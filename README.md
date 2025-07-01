@@ -1,2 +1,2 @@
 # PortfolioV2
-This is my porfolio websit
+This is my porfolio website
