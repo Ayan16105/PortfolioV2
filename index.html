@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayan Khan - Interactive Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/TextPlugin.min.js"></script>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        :root {
+            --primary-color: #0D0D0D;
+            --secondary-color: #1A1A1A;
+            --accent-color: #00A8FF;
+            --text-primary: #E0E0E0;
+            --text-secondary: #BDBDBD;
+        }
+        html {
+            overflow: auto;
+        }
+        body {
+            background-color: var(--primary-color);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            height: 800vh; /* Provides scrollable length for the animation */
+            overflow-x: hidden;
+        }
+        #profile-art {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; 
+        }
+        .scroll-section {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+            will-change: transform, opacity;
+            opacity: 0;
+            visibility: hidden;
+            perspective: 1000px; /* Added for 3D transforms */
+        }
+        .scroll-section.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .section-content-wrapper {
+             max-height: 90vh;
+             overflow-y: auto;
+             padding: 1rem;
+             width: 100%;
+        }
+        .section-content-wrapper::-webkit-scrollbar {
+          width: 5px;
+        }
+        .section-content-wrapper::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        .section-content-wrapper::-webkit-scrollbar-thumb {
+          background: var(--accent-color);
+          border-radius: 10px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        @media (min-width: 768px) {
+            .section-title {
+                font-size: 2.5rem;
+            }
+            .section-content-wrapper {
+                 padding: 2rem;
+            }
+        }
+        .card {
+            background-color: rgba(26, 26, 26, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 168, 255, 0.1);
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple 600ms linear;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+        
+        .image-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 0 15px rgba(0, 168, 255, 0.5);
+            margin: 0 auto 2rem auto;
+        }
+        @media (min-width: 1024px) {
+            .image-container {
+                 width: 200px;
+                 height: 200px;
+                 margin: 0;
+            }
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease, filter 0.4s ease;
+            filter: grayscale(80%);
+        }
+        .image-container:hover img {
+            transform: scale(1.1);
+            filter: grayscale(0%);
+        }
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            padding: 1rem;
+            font-weight: 600;
+        }
+        .image-container:hover .image-overlay {
+            opacity: 1;
+        }
+        #hero-avatar-container {
+            width: 100%;
+            height: 50vh;
+            cursor: grab;
+        }
+    </style>
+</head>
+<body>
+    <div id="profile-art"></div>
+
+    <section id="hero" class="scroll-section">
+        <!-- Container for the 3D avatar -->
+        <div id="hero-avatar-container"></div>
+        <div class="text-center mt-4">
+             <h1 class="text-4xl md:text-5xl font-bold text-white tracking-tighter hero-title">AYAN KHAN</h1>
+             <!-- Container for typewriter effect -->
+             <p class="text-xl md:text-2xl text-text-secondary mt-2 h-8">
+                 <span class="hero-subtitle"></span><span class="cursor -ml-1 w-1 h-6 md:h-8 bg-accent-color inline-block"></span>
+             </p>
+        </div>
+    </section>
+
+    <section id="about" class="scroll-section">
+        <div class="section-content-wrapper">
+            <h2 class="section-title">About Me</h2>
+            <div class="card p-6 md:p-12 rounded-2xl flex flex-col lg:flex-row items-center gap-8 lg:gap-12 w-full max-w-5xl mx-auto">
+                <div class="image-container flex-shrink-0">
+                    <img src="media/about.jpeg" alt="Ayan Khan" onerror="this.onerror=null;this.src='https://placehold.co/300x300/1A1A1A/E0E0E0?text=Image';">
+                    <div class="image-overlay">Ayan Khan</div>
+                </div>
+                <div class="text-center lg:text-left">
+                    <p class="text-md lg:text-lg text-text-secondary leading-relaxed mb-6">
+                        Motivated BCA student passionate about development and cloud tech. I thrive on turning complex problems into elegant, efficient digital solutions.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="about-point p-4 border border-gray-700 rounded-lg"><h4 class="text-lg font-semibold text-white">Problem Solver</h4><p class="text-text-secondary mt-1 text-sm">Debugging & optimizing code.</p></div>
+                        <div class="about-point p-4 border border-gray-700 rounded-lg"><h4 class="text-lg font-semibold text-white">Lifelong Learner</h4><p class="text-text-secondary mt-1 text-sm">Exploring new tech.</p></div>
+                        <div class="about-point p-4 border border-gray-700 rounded-lg"><h4 class="text-lg font-semibold text-white">Collaborator</h4><p class="text-text-secondary mt-1 text-sm">Building great products with teams.</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="experience" class="scroll-section">
+         <div class="section-content-wrapper w-full max-w-4xl">
+            <h2 class="section-title">Experience</h2>
+            <div class="space-y-8">
+                <div class="timeline-item card p-6 rounded-2xl relative text-left">
+                    <h3 class="text-xl md:text-2xl font-bold text-white">Frontend Developer (Intern)</h3>
+                    <p class="text-accent-color font-semibold text-lg">Zedsa</p>
+                    <p class="text-text-secondary mb-3">Feb 2024 - April 2024</p>
+                    <ul class="list-disc list-inside text-text-secondary space-y-2">
+                        <li>Developed a fully functional, responsive Production Hub website from scratch.</li>
+                        <li>Handled the front-end process using HTML, JS, and Tailwind.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="scroll-section">
+        <div class="section-content-wrapper w-full max-w-5xl">
+            <h2 class="section-title">Skills</h2>
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 text-center">
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-java text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">Java</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-python text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">Python</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-javascript text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">JavaScript</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-html5 text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">HTML5</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-css3 text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">CSS3</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-react text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">React</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-nodejs text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">Node.js</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-tailwind-css text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">Tailwind</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-mongodb text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">MongoDB</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-aws text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">AWS</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-git text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">Git</span></div>
+                <div class="skill-card card p-4 rounded-xl flex flex-col items-center justify-center h-24"><i class='bx bxl-c-plus-plus text-4xl md:text-5xl text-accent-color'></i><span class="mt-2 text-sm">C++</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="scroll-section">
+        <div class="section-content-wrapper w-full max-w-6xl">
+            <h2 class="section-title">Projects</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="project-card card p-6 rounded-2xl text-left"><h3 class="text-xl font-bold text-white mb-2">EcoBin - Smart Waste System</h3><p class="text-text-secondary text-sm mb-3">MVP for a smart waste system with user rewards.</p><a href="#" class="btn relative overflow-hidden inline-block text-accent-color font-semibold">View Project</a></div>
+                <div class="project-card card p-6 rounded-2xl text-left"><h3 class="text-xl font-bold text-white mb-2">SmartTimetable Java App</h3><p class="text-text-secondary text-sm mb-3">Automated timetable generator using Java & SQL.</p><a href="#" class="btn relative overflow-hidden inline-block text-accent-color font-semibold">View Project</a></div>
+                <div class="project-card card p-6 rounded-2xl text-left"><h3 class="text-xl font-bold text-white mb-2">Personal Portfolio V2</h3><p class="text-text-secondary text-sm mb-3">This portfolio, built with Three.js & GSAP.</p><a href="#" class="btn relative overflow-hidden inline-block text-accent-color font-semibold">View Source</a></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="achievements" class="scroll-section">
+        <div class="section-content-wrapper w-full max-w-4xl">
+            <h2 class="section-title">Achievements</h2>
+            <div class="space-y-6">
+                <div class="achievement-card card p-6 rounded-2xl flex items-center gap-6"><div class="text-5xl text-accent-color flex-shrink-0"><i class='bx bx-trophy'></i></div><div class="text-left"><h3 class="text-xl font-bold text-white">First Runner-up</h3><p class="text-md text-text-secondary">HackCrux Hackathon | March 2024</p></div></div>
+                <div class="achievement-card card p-6 rounded-2xl flex items-center gap-6"><div class="text-5xl text-accent-color flex-shrink-0"><i class='bx bxs-graduation'></i></div><div class="text-left"><h3 class="text-xl font-bold text-white">Academic Excellence Scholarship</h3><p class="text-md text-text-secondary">University of Technology | 2023</p></div></div>
+                <div class="achievement-card card p-6 rounded-2xl flex items-center gap-6"><div class="text-5xl text-accent-color flex-shrink-0"><i class='bx bxs-certification'></i></div><div class="text-left"><h3 class="text-xl font-bold text-white">AWS Certified Cloud Practitioner</h3><p class="text-md text-text-secondary">Amazon Web Services | 2024</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="scroll-section">
+         <div class="section-content-wrapper w-full max-w-xl">
+            <h2 class="section-title">Contact</h2>
+            <div class="text-center card p-8 md:p-10 rounded-2xl">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Get In Touch</h2>
+                <p class="text-md md:text-lg text-text-secondary mb-8">I'm currently seeking new opportunities. Feel free to reach out!</p>
+                <a href="mailto:ayankhan.wrk@gmail.com" class="btn relative overflow-hidden bg-accent-color text-primary-color font-bold py-3 px-8 rounded-full text-lg hover:bg-white transition-colors duration-300 inline-block mb-8">Say Hello</a>
+                <div class="flex justify-center space-x-6"><a href="#" target="_blank" class="text-text-secondary hover:text-accent-color transition-colors duration-300 text-4xl"><i class='bx bxl-github'></i></a><a href="#" target="_blank" class="text-text-secondary hover:text-accent-color transition-colors duration-300 text-4xl"><i class='bx bxl-linkedin-square'></i></a><a href="#" target="_blank" class="text-text-secondary hover:text-accent-color transition-colors duration-300 text-4xl"><i class='bx bxl-twitter'></i></a></div>
+           </div>
+        </div>
+    </section>
+
+
+    <!-- Three.js and GLTFLoader scripts -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        gsap.registerPlugin(ScrollTrigger, TextPlugin);
+
+        // --- Three.js Particle Background ---
+        let particleScene, particleCamera, particleRenderer, particleSystem;
+        const profileArtContainer = document.getElementById('profile-art');
+
+        function initParticleArt() {
+            particleScene = new THREE.Scene();
+            particleCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            particleRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            particleRenderer.setSize(window.innerWidth, window.innerHeight);
+            profileArtContainer.appendChild(particleRenderer.domElement);
+            const particleCount = 8000;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            for (let i = 0; i < particleCount * 3; i++) { positions[i] = (Math.random() - 0.5) * 30; }
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+            const particleMaterial = new THREE.PointsMaterial({ color: new THREE.Color(accentColor), size: 0.035, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 1 });
+            particleSystem = new THREE.Points(particles, particleMaterial);
+            particleScene.add(particleSystem);
+            particleCamera.position.z = 10;
+        }
+
+        function animateParticleArt() {
+            requestAnimationFrame(animateParticleArt);
+            particleSystem.rotation.y += 0.0002;
+            particleSystem.rotation.x += 0.0001;
+            particleRenderer.render(particleScene, particleCamera);
+        }
+
+        initParticleArt();
+        animateParticleArt();
+
+        // --- Three.js 3D Avatar in Hero Section ---
+        let avatarScene, avatarCamera, avatarRenderer, avatarModel, controls;
+        const avatarContainer = document.getElementById('hero-avatar-container');
+
+        function initAvatar() {
+            avatarScene = new THREE.Scene();
+            avatarCamera = new THREE.PerspectiveCamera(50, avatarContainer.clientWidth / avatarContainer.clientHeight, 0.1, 100);
+            avatarCamera.position.z = 8;
+            
+            avatarRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            avatarRenderer.setSize(avatarContainer.clientWidth, avatarContainer.clientHeight);
+            avatarRenderer.setPixelRatio(window.devicePixelRatio);
+            avatarContainer.appendChild(avatarRenderer.domElement);
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+            avatarScene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 2.5);
+            directionalLight.position.set(5, 10, 7.5);
+            avatarScene.add(directionalLight);
+
+            const loader = new GLTFLoader();
+            loader.load('https://raw.githubusercontent.com/google/model-viewer/master/packages/shared-assets/models/Astronaut.glb', function (gltf) {
+                avatarModel = gltf.scene;
+                avatarModel.scale.set(2.5, 2.5, 2.5);
+                avatarModel.position.y = -3;
+                avatarScene.add(avatarModel);
+                gsap.from(avatarModel.scale, { x: 0, y: 0, z: 0, duration: 1.5, ease: 'power2.out', delay: 0.5 });
+            }, undefined, function (error) {
+                console.error(error);
+            });
+
+            controls = new OrbitControls(avatarCamera, avatarRenderer.domElement);
+            controls.enableDamping = true;
+            controls.enableZoom = false; 
+            controls.enablePan = false; 
+            controls.autoRotate = false;
+        }
+
+        function animateAvatar() {
+            requestAnimationFrame(animateAvatar);
+            if(controls) controls.update();
+            if(avatarRenderer) avatarRenderer.render(avatarScene, avatarCamera);
+        }
+
+        initAvatar();
+        animateAvatar();
+
+        // --- Hero Text Animations ---
+        const heroTitle = document.querySelector('.hero-title');
+        const heroSubtitle = document.querySelector('.hero-subtitle');
+        const cursor = document.querySelector('.cursor');
+
+        gsap.set(heroTitle, { autoAlpha: 0, y: 20 });
+        gsap.set(cursor, { autoAlpha: 0 });
+
+        const heroTimeline = gsap.timeline({ delay: 1.8 }); // Delay to start after avatar appears
+        heroTimeline
+            .to(heroTitle, { autoAlpha: 1, y: 0, duration: 1, ease: 'power2.out' })
+            .to(cursor, { autoAlpha: 1, duration: 0.2 }, "-=0.5")
+            .to(heroSubtitle, {
+                text: "Software & Frontend Developer",
+                duration: 2.5,
+                ease: "none"
+            })
+            .to(cursor, { // Blinking cursor at the end
+                opacity: 0,
+                repeat: -1,
+                yoyo: true,
+                duration: 0.5,
+                ease: "power1.inOut"
+            });
+
+        // --- Page Scroll Animations ---
+        const sections = gsap.utils.toArray('.scroll-section');
+        
+        gsap.set(sections, { autoAlpha: 0, scale: 0.8, visibility: 'hidden' });
+        gsap.set(sections[0], { autoAlpha: 1, scale: 1, visibility: 'visible' });
+        sections[0].classList.add('active');
+
+        const masterTimeline = gsap.timeline({
+            scrollTrigger: {
+                trigger: 'body',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1.5,
+            }
+        });
+        
+        masterTimeline.to({}, { duration: 1 });
+
+        sections.forEach((section, i) => {
+            const nextSection = sections[i + 1];
+            if (nextSection) {
+                masterTimeline
+                    .to(section, { scale: 0.8, autoAlpha: 0, ease: 'power1.in' })
+                    .to(nextSection, { scale: 1, autoAlpha: 1, ease: 'power1.out' })
+                    .to({}, { duration: 1 });
+            }
+        });
+
+        gsap.to(particleCamera.position, {
+            z: -15, 
+            ease: 'none',
+            scrollTrigger: {
+                trigger: 'body',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1.5,
+            },
+        });
+
+        // --- Event Listeners ---
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const rect = e.target.getBoundingClientRect();
+                const circle = document.createElement('span');
+                const diameter = Math.max(e.target.clientWidth, e.target.clientHeight);
+                const radius = diameter / 2;
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${e.clientX - rect.left - radius}px`;
+                circle.style.top = `${e.clientY - rect.top - radius}px`;
+                circle.classList.add('ripple');
+                const ripple = button.getElementsByClassName('ripple')[0];
+                if(ripple) { ripple.remove(); }
+                button.appendChild(circle);
+            });
+        });
+
+        document.body.addEventListener('mousemove', (e) => {
+            const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            gsap.to(particleCamera.rotation, {
+                y: gsap.utils.interpolate(particleCamera.rotation.y, mouseX * 0.2, 0.1),
+                x: gsap.utils.interpolate(particleCamera.rotation.x, -mouseY * 0.2, 0.1),
+                duration: 1.5,
+                ease: "power2.out"
+            });
+        });
+
+        avatarContainer.addEventListener('mousemove', (e) => {
+            if (!avatarModel) return;
+            const rect = avatarContainer.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+            gsap.to(avatarModel.rotation, {
+                y: x * 0.5,
+                x: y * 0.2,
+                duration: 1,
+                ease: 'power2.out'
+            });
+        });
+        
+        avatarContainer.addEventListener('mouseleave', () => {
+             if (!avatarModel) return;
+             gsap.to(avatarModel.rotation, {
+                y: 0,
+                x: 0,
+                duration: 1,
+                ease: 'power2.out'
+             });
+        });
+
+        window.addEventListener('resize', () => {
+            particleCamera.aspect = window.innerWidth / window.innerHeight;
+            particleCamera.updateProjectionMatrix();
+            particleRenderer.setSize(window.innerWidth, window.innerHeight);
+            
+            if (avatarContainer && avatarRenderer) {
+                avatarCamera.aspect = avatarContainer.clientWidth / avatarContainer.clientHeight;
+                avatarCamera.updateProjectionMatrix();
+                avatarRenderer.setSize(avatarContainer.clientWidth, avatarContainer.clientHeight);
+            }
+        });
+    </script>
+</body>
+</html>
